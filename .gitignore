@@ -1,0 +1,7 @@
+folder/
+.env
+config.js
+*.log
+script.js
+material.txt
+demo.txt

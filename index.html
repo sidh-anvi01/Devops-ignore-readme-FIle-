@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A quick guide to sending your local Git project to GitHub.">
+    <title>Git to GitHub | Fieldnotes</title>
+    <style>
+        :root { --ink: #202a28; --muted: #65716c; --paper: #f4f2ec; --green: #285b49; --line: #d9ddd5; --lime: #d5e56e; --mono: Consolas, monospace; --serif: Georgia, "Times New Roman", serif; }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--paper); color: var(--ink); font-family: "Trebuchet MS", "Segoe UI", sans-serif; line-height: 1.55; }
+        .shell { width: min(1080px, calc(100% - 48px)); margin: 0 auto; }
+        header { height: 72px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+        .brand { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; text-decoration: none; }
+        .mark { display: grid; width: 30px; height: 30px; place-items: center; background: var(--green); color: var(--lime); font-family: var(--mono); }
+        nav { display: flex; gap: 24px; color: var(--muted); font-size: 13px; }
+        nav a { color: inherit; text-decoration: none; }
+        .intro { display: grid; grid-template-columns: 1fr .9fr; gap: 64px; align-items: center; padding: 64px 0 58px; }
+        .eyebrow { margin: 0 0 18px; color: var(--green); font: 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+        h1 { max-width: 540px; margin: 0; font: 400 clamp(42px, 6vw, 68px)/1.04 var(--serif); }
+        h1 em { color: var(--green); }
+        .lead { max-width: 420px; margin: 20px 0 26px; color: var(--muted); }
+        .button { display: inline-flex; gap: 14px; padding: 12px 16px; background: var(--green); color: white; font-size: 13px; font-weight: 700; text-decoration: none; }
+        .button span { color: var(--lime); }
+        .visual { position: relative; min-height: 320px; background: #d8ddd4; }
+        .visual img { position: absolute; width: 100%; height: 100%; object-fit: cover; inset: 0; }
+        .note { position: absolute; right: -14px; bottom: 16px; width: 190px; padding: 14px 16px; background: var(--lime); font: 11px/1.5 var(--mono); }
+        .note strong { display: block; margin-bottom: 4px; }
+        .workflow { padding: 28px 0 68px; border-top: 1px solid var(--line); }
+        .section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+        h2 { margin: 0; font: 400 30px var(--serif); }
+        .section-head p { margin: 0; color: var(--muted); font-size: 13px; }
+        .steps { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+        .step { min-width: 0; padding: 19px 18px 22px 0; }
+        .step + .step { padding-left: 18px; border-left: 1px solid var(--line); }
+        .number { display: flex; justify-content: space-between; margin-bottom: 18px; color: var(--green); font: 11px var(--mono); }
+        .number span:last-child { color: #9aa29b; }
+        h3 { margin: 0 0 6px; font-size: 15px; }
+        .step p { min-height: 38px; margin: 0 0 14px; color: var(--muted); font-size: 12px; }
+        pre { overflow-x: auto; margin: 0; padding: 11px; background: #e9ebe4; color: #30413a; font: 11px/1.8 var(--mono); }
+        footer { display: flex; justify-content: space-between; gap: 16px; padding: 17px 0 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+        .keep-going { padding: 28px 0 54px; border-top: 1px solid var(--line); }
+        .routine { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+        .routine-step { padding: 18px 18px 20px 0; }
+        .routine-step + .routine-step { padding-left: 18px; border-left: 1px solid var(--line); }
+        .routine-label { margin: 0 0 14px; color: var(--green); font: 11px var(--mono); }
+        .routine-step p { min-height: 38px; margin: 0 0 14px; color: var(--muted); font-size: 12px; }
+        .tip { margin: 20px 0 0; padding-left: 14px; border-left: 3px solid var(--green); color: var(--muted); font-size: 12px; }
+        .tip strong { color: var(--ink); }
+        .undo { padding: 28px 0 54px; border-top: 1px solid var(--line); }
+        .undo-grid { display: grid; grid-template-columns: repeat(2, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+        .undo-item { padding: 18px 22px 20px 0; }
+        .undo-item + .undo-item { padding-left: 22px; border-left: 1px solid var(--line); }
+        .undo-item p { min-height: 38px; margin: 0 0 14px; color: var(--muted); font-size: 12px; }
+        @media (max-width: 760px) {
+            .shell { width: min(calc(100% - 36px), 560px); }
+            .intro { grid-template-columns: 1fr; gap: 30px; padding: 48px 0 40px; }
+            .visual { min-height: 260px; margin-right: 10px; }
+            .steps { grid-template-columns: repeat(2, 1fr); }
+            .step { padding: 17px 13px 19px 0; }
+            .step + .step { padding-left: 13px; }
+            .step:nth-child(3) { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); }
+            .step:nth-child(4) { border-top: 1px solid var(--line); }
+            .step p { min-height: 0; }
+            .routine { grid-template-columns: 1fr; }
+            .routine-step, .routine-step + .routine-step { padding: 16px 0; border-left: 0; }
+            .routine-step + .routine-step { border-top: 1px solid var(--line); }
+            .routine-step p { min-height: 0; }
+            .undo-grid { grid-template-columns: 1fr; }
+            .undo-item, .undo-item + .undo-item { padding: 16px 0; border-left: 0; }
+            .undo-item + .undo-item { border-top: 1px solid var(--line); }
+        }
+        @media (max-width: 430px) {
+            nav { gap: 12px; font-size: 12px; }
+            .brand { font-size: 11px; }
+            .section-head, footer { align-items: start; flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <header>
+            <a class="brand" href="#top"><span class="mark" aria-hidden="true">&gt;_</span> FuturPower / DevOps</a>
+            <nav aria-label="Main navigation"><a href="#workflow">Workflow</a><a href="#commands">Commands</a><a href="#next-time">Next time</a></nav>
+        </header>
+        <main id="top">
+            <section class="intro" aria-labelledby="page-title">
+                <div>
+                    <p class="eyebrow">A practical Git field guide</p>
+                    <h1 id="page-title">From your machine <em>to GitHub.</em></h1>
+                    <p class="lead">A straightforward path from a local project to a repository you can share. Set up once, then keep your changes moving.</p>
+                    <a class="button" href="#workflow">Follow the workflow <span aria-hidden="true">&darr;</span></a>
+                </div>
+                <div class="visual">
+                    <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1100&q=85" alt="Close-up of a circuit board and its components">
+                    <div class="note"><strong>LOCAL &rarr; REMOTE</strong>One project. One shared source of truth.</div>
+                </div>
+            </section>
+            <section class="workflow" id="workflow" aria-labelledby="workflow-title">
+                <div class="section-head"><h2 id="workflow-title">The first push</h2><p>Four steps to publish your project.</p></div>
+                <div class="steps" id="commands">
+                    <article class="step">
+                        <div class="number"><span>01 / PREPARE</span><span>01</span></div>
+                        <h3>Initialize Git</h3><p>Start tracking the project in this folder.</p>
+                        <pre><code>git init</code></pre>
+                    </article>
+                    <article class="step">
+                        <div class="number"><span>02 / SAVE</span><span>02</span></div>
+                        <h3>Commit your files</h3><p>Stage your work, then save a snapshot.</p>
+                        <pre><code>git add .
+git commit -m "Initial commit"</code></pre>
+                    </article>
+                    <article class="step">
+                        <div class="number"><span>03 / CONNECT</span><span>03</span></div>
+                        <h3>Set up GitHub</h3><p>Create a remote repo and link it here.</p>
+                        <pre><code>git branch -M main
+git remote add origin &lt;url&gt;</code></pre>
+                    </article>
+                    <article class="step">
+                        <div class="number"><span>04 / PUBLISH</span><span>04</span></div>
+                        <h3>Push it up</h3><p>Publish the main branch for the first time.</p>
+                        <pre><code>git push -u origin main</code></pre>
+                    </article>
+                </div>
+            </section>
+            <section class="keep-going" id="next-time" aria-labelledby="next-title">
+                <div class="section-head"><h2 id="next-title">After the first push</h2><p>Repeat this loop whenever you make changes.</p></div>
+                <div class="routine">
+                    <article class="routine-step">
+                        <p class="routine-label">01 / REVIEW</p>
+                        <h3>Check your changes</h3>
+                        <p>See which files Git has noticed before staging them.</p>
+                        <pre><code>git status</code></pre>
+                    </article>
+                    <article class="routine-step">
+                        <p class="routine-label">02 / SAVE</p>
+                        <h3>Commit a snapshot</h3>
+                        <p>Stage your work and give the change a clear message.</p>
+                        <pre><code>git add .
+git commit -m "Describe the change"</code></pre>
+                    </article>
+                    <article class="routine-step">
+                        <p class="routine-label">03 / SHARE</p>
+                        <h3>Push updates</h3>
+                        <p>Send your new commit to the connected GitHub repo.</p>
+                        <pre><code>git push</code></pre>
+                    </article>
+                </div>
+                <p class="tip"><strong>Tip:</strong> When connecting an existing local project, create an empty GitHub repository. Skip adding a README, .gitignore, or license on GitHub so the first push stays straightforward.</p>
+            </section>
+            <section class="undo" id="undo" aria-labelledby="undo-title">
+                <div class="section-head"><h2 id="undo-title">Undo changes</h2><p>Choose the command based on what you need to undo.</p></div>
+                <div class="undo-grid">
+                    <article class="undo-item">
+                        <h3>Restore a file</h3>
+                        <p>Discard unstaged edits in a file and return it to the last committed version. This replaces your current edits.</p>
+                        <pre><code>git restore &lt;file&gt;</code></pre>
+                        <p>To unstage a file but keep its edits:</p>
+                        <pre><code>git restore --staged &lt;file&gt;</code></pre>
+                    </article>
+                    <article class="undo-item">
+                        <h3>Revert a commit</h3>
+                        <p>Create a new commit that reverses an earlier commit. This preserves history and is the safer choice for changes already pushed.</p>
+                        <pre><code>git revert &lt;commit-id&gt;</code></pre>
+                        <p>Then share the new undo commit:</p>
+                        <pre><code>git push</code></pre>
+                    </article>
+                </div>
+                <p class="tip"><strong>Remember:</strong> <code>restore</code> changes files or staging; <code>revert</code> adds a commit to history. Check <code>git status</code> before undoing anything.</p>
+            </section>
+        </main>
+        <footer><span>FIELDNOTES / DEVOPS</span><span>Small steps. Clear history. Shared code.</span></footer>
+    </div>
+</body>
+</html>
